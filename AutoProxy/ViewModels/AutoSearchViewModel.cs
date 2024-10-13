@@ -61,10 +61,11 @@ namespace AutoProxy.ViewModels
         {
             if (!AutoSwitching) 
             {
-                cancellationTokenSource.Cancel();
+                cancellationTokenSource?.Cancel();
                 return;
             }
 
+            cancellationTokenSource?.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
             Task.Run(DoSearching);
         }
