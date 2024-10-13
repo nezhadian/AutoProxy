@@ -13,10 +13,16 @@
     <Grid>
         <StackPanel Margin="20,0" VerticalAlignment="Center">
 
-            <TextBlock
-                FontSize="18"
-                Text="{Binding proxy.Status}"
-                TextAlignment="Center" />
+            <TextBlock FontSize="18" TextAlignment="Center">
+                <Run Text="{Binding proxy.Gateway}" />
+                <Run>:</Run>
+                <Run Text="{Binding proxy.Port}" />
+                <LineBreak />
+                <Run
+                    FontSize="19"
+                    FontWeight="SemiBold"
+                    Text="{Binding proxy.Status}" />
+            </TextBlock>
 
 
             <Label Margin="0,40,0,0">Port:</Label>
@@ -25,7 +31,7 @@
             <Label>Delay:</Label>
             <TextBox Text="{Binding proxy.auto.Delay}" />
 
-            <CheckBox Margin="0,4,0,0" IsChecked="{Binding proxy.auto.AutoSwitching}">Auto Mode</CheckBox>
+            <CheckBox Margin="0,4,0,0" IsChecked="{Binding proxy.auto.AutoMode}">Auto Mode</CheckBox>
 
             <Grid Margin="0,20,0,0">
                 <Grid.ColumnDefinitions>

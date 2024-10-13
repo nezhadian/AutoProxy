@@ -48,7 +48,6 @@ namespace AutoProxy.ViewModels
             {
                 case nameof(autoProxyViewModel.Gateway):
                 case nameof(autoProxyViewModel.Port):
-                    SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
                     OnAutoSwitchingChanged();
                     break;
             }
@@ -62,13 +61,14 @@ namespace AutoProxy.ViewModels
             if (!AutoMode) 
             {
                 cancellationTokenSource?.Cancel();
-                SetStatus("Auto Mode Stopped.");
+                SetStatus("Disconnected.");
                 SystemProxyHelper.ClearSystemProxy();
                 return;
             }
 
             cancellationTokenSource?.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
+            SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
             Task.Run(DoSearching);
         }
 
@@ -77,31 +77,35 @@ namespace AutoProxy.ViewModels
             var token = cancellationTokenSource.Token;
             while (!token.IsCancellationRequested)
             {
-                SetStatus($"Checking {autoProxyViewModel.Gateway}{autoProxyViewModel.Port}");
+                SetStatus($"Checking...");
                 var isOpen = SystemProxyHelper.IsPortOpen(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
 
                 if (isOpen)
                 {
-                    SetStatus("Still Connected.");
+                    SetStatus("Connected.");
+                    await Task.Delay(TimeSpan.FromSeconds(Delay), token);
+
                 }
                 else
                 {
-                    SystemProxyHelper.ClearSystemProxy();
                     SetStatus("Disconnected. Searching...");
                     var gateway = NetworkAdaptersHelper.GetFirstOpenGateway(autoProxyViewModel.Port, token);
                     if(gateway is null)
                     {
-                        SetStatus("Failed to find.");
+                        SetStatus("Failed.");
+                        SystemProxyHelper.ClearSystemProxy();
+                        await Task.Delay(TimeSpan.FromSeconds(1), token);
+
                     }
                     else
                     {
                         autoProxyViewModel.Gateway = gateway.ToString();
-                        SetStatus($"Reconnected to {autoProxyViewModel.Gateway}:{autoProxyViewModel.Port}");
+                        SetStatus($"Reconnected.");
                         SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
+                        await Task.Delay(TimeSpan.FromSeconds(Delay), token);
 
                     }
                 }
-                await Task.Delay(TimeSpan.FromSeconds(Delay),token);
             }
         }
 

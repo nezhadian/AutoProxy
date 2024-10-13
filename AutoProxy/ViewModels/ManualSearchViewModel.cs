@@ -66,7 +66,7 @@ namespace AutoProxy.ViewModels
 
             autoProxyViewModel.Gateway = gateway.ToString();
             SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
-            SetStatus($"Connected to {gateway}:{autoProxyViewModel.Port}");
+            SetStatus($"Connected.");
 
         }
 
