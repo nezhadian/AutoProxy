@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoProxy.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,7 @@ namespace AutoProxy
         {
             InitializeComponent();
             DataContext = App.MainViewModel;
+            new ConsoleOutputRedirector(txtOutput,sclOutput);
         }
     }
 }

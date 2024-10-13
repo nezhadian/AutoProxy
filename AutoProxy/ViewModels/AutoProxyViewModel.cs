@@ -59,7 +59,7 @@ namespace AutoProxy.ViewModels
             }
         }
 
-        private int _delay = 15;
+        private int _delay = 3;
         public int Delay
         {
             get { return _delay; }
@@ -114,6 +114,7 @@ namespace AutoProxy.ViewModels
 
             });
 
+            ResetProxyMonitor();
         }
         private void NetworkAdaptersHelper_OnFailed()
         {
@@ -138,13 +139,16 @@ namespace AutoProxy.ViewModels
                 proxyMonitor.StopMonitoring();
             }
 
-            proxyMonitor = new ProxyMonitor(Gateway, Port, Delay);
-            proxyMonitor.ProxyDisabled += NetworkAdaptersHelper_OnFailed;
+            proxyMonitor = new ProxyMonitor(Gateway, Port, Delay,networkAdaptersHelper);
+            proxyMonitor.ProxyDisabled += ProxyMonitor_ProxyDisabled; ;
+            proxyMonitor.ProxyOK += ProxyMonitor_ProxyOK; ;
             await proxyMonitor.StartMonitoringAsync();
         }
         public void ResetProxyMonitor()
         {
-            if(!AutoSwitching)
+            
+
+            if (!AutoSwitching)
             {
                 proxyMonitor?.StopMonitoring();
                 proxyMonitor = null;
@@ -152,6 +156,39 @@ namespace AutoProxy.ViewModels
             }
 
             Task.Run(ResetProxyMonitorAsync);
+        }
+
+
+        private void ProxyMonitor_ProxyOK()
+        {
+            if (IsConnected == true)
+                return;
+
+            if (proxyMonitor is null)
+                return;
+            
+
+            proxyMonitor.SetSystemProxy(Gateway, Port);
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                IsConnected = true;
+                Status = $"Proxy Reconnected to {Gateway}:{Port}";
+            });
+        }
+
+        private void ProxyMonitor_ProxyDisabled()
+        {
+            if (proxyMonitor is null)
+                return;
+
+            proxyMonitor.ClearSystemProxy();
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                IsConnected = false;
+                Status = $"Proxy disabled due to closed port.";
+            });
         }
     }
 }

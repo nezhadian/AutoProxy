@@ -15,16 +15,20 @@ namespace AutoProxy.Helpers
         private readonly int _port;
         private readonly int _delay;
         private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly NetworkAdaptersHelper _networkAdaptersHelper;
+
 
         // Event to notify when the proxy is disabled
         public event Action ProxyDisabled;
+        public event Action ProxyOK;
 
-        public ProxyMonitor(string gatewayIpAddress, int port, int delay)
+        public ProxyMonitor(string gatewayIpAddress, int port, int delay, NetworkAdaptersHelper networkAdaptersHelper)
         {
             _gatewayIpAddress = gatewayIpAddress;
             _port = port;
             _delay = delay;
             _cancellationTokenSource = new CancellationTokenSource();
+            _networkAdaptersHelper = networkAdaptersHelper;
         }
 
         public async Task StartMonitoringAsync()
@@ -36,9 +40,14 @@ namespace AutoProxy.Helpers
 
                 if (!isPortOpen)
                 {
-                    ClearSystemProxy();
                     Console.WriteLine("Proxy disabled due to closed port.");
                     OnProxyDisabled(); // Invoke the event when the proxy is disabled
+                    await _networkAdaptersHelper.TestGatewaysPortAndSetProxyAsync(_port, App.Current.Dispatcher);
+                }
+                else
+                {
+                    Console.WriteLine("Proxy is stable.");
+                    OnProxyOK();
                 }
 
                 // Wait for 15 seconds before the next check
@@ -49,6 +58,12 @@ namespace AutoProxy.Helpers
         {
             ProxyDisabled?.Invoke(); // Invoke the event
         }
+
+        protected virtual void OnProxyOK()
+        {
+            ProxyOK?.Invoke(); // Invoke the event
+        }
+
 
         public void StopMonitoring()
         {

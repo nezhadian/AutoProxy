@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\ConsoleOutputRedirector.cs" />
     <Compile Include="Helpers\NetworkAdaptersHelper.cs" />
     <Compile Include="Helpers\ProxyMonitor.cs" />
     <Compile Include="Helpers\SystemProxyHelper.cs" />

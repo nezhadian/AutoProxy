@@ -12,7 +12,10 @@
     <Grid>
         <StackPanel Margin="20,0" VerticalAlignment="Center">
 
-            <Label>Port:</Label>
+            <TextBlock FontSize="24" Text="{Binding proxy.Status}" />
+
+
+            <Label Margin="0,40,0,0">Port:</Label>
             <TextBox Text="{Binding proxy.Port}" />
 
             <Label>Delay:</Label>
@@ -30,11 +33,19 @@
                 <Button Grid.Column="1" Command="{Binding proxy.DisconnectCommand}">Disconnect</Button>
             </Grid>
 
-            <TextBlock
+            <ScrollViewer
+                x:Name="sclOutput"
+                Height="200"
                 Margin="0,40,0,0"
-                HorizontalAlignment="Center"
-                FontSize="16"
-                Text="{Binding proxy.Status, Delay=100}" />
+                VerticalScrollBarVisibility="Visible">
+
+
+                <TextBlock
+                    x:Name="txtOutput"
+                    FontSize="12"
+                    Text="{Binding proxy.Status, Delay=100}"
+                    TextWrapping="Wrap" />
+            </ScrollViewer>
         </StackPanel>
     </Grid>
 </Window>
