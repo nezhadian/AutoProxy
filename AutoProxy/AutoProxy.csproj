@@ -55,6 +55,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\NetworkAdaptersHelper.cs" />
+    <Compile Include="Helpers\SystemProxyHelper.cs" />
     <Compile Include="ViewModels\AutoProxyViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">

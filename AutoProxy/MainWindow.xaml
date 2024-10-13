@@ -10,6 +10,18 @@
     Height="600"
     mc:Ignorable="d">
     <Grid>
-        <ToggleButton Width="250" Height="250" />
+        <StackPanel VerticalAlignment="Center">
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="16"
+                Text="{Binding proxy.Status}" />
+
+            <ToggleButton
+                Width="70"
+                Height="70"
+                Margin="0,10,0,0"
+                IsChecked="{Binding proxy.IsConnected, Mode=TwoWay}" />
+        </StackPanel>
     </Grid>
 </Window>
