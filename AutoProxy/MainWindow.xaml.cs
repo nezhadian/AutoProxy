@@ -23,6 +23,7 @@ namespace AutoProxy
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = App.MainViewModel;
         }
     }
 }

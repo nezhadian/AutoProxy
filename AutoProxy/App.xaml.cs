@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoProxy.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -13,5 +14,6 @@ namespace AutoProxy
     /// </summary>
     public partial class App : Application
     {
+        public static MainViewModel MainViewModel = new MainViewModel();
     }
 }
