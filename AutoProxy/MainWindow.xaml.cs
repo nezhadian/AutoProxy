@@ -27,5 +27,10 @@ namespace AutoProxy
             DataContext = App.MainViewModel;
             new ConsoleOutputRedirector(txtOutput,sclOutput);
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            App.MainViewModel.proxy.auto.AutoSwitching = true;
+        }
     }
 }

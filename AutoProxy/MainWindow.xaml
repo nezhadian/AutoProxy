@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="MainWindow"
     Width="400"
+    Loaded="Window_Loaded"
     Height="600"
     mc:Ignorable="d">
     <Grid>
@@ -19,9 +20,9 @@
             <TextBox Text="{Binding proxy.Port}" />
 
             <Label>Delay:</Label>
-            <TextBox Text="{Binding proxy.Delay}" />
+            <TextBox Text="{Binding proxy.auto.Delay}" />
 
-            <CheckBox Margin="0,4,0,0" IsChecked="{Binding proxy.AutoSwitching}">Auto Switching</CheckBox>
+            <CheckBox Margin="0,4,0,0" IsChecked="{Binding proxy.auto.AutoSwitching}">Auto Switching</CheckBox>
 
             <Grid Margin="0,20,0,0">
                 <Grid.ColumnDefinitions>
@@ -29,8 +30,8 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Command="{Binding proxy.ConnectCommand}">Connect</Button>
-                <Button Grid.Column="1" Command="{Binding proxy.DisconnectCommand}">Disconnect</Button>
+                <Button Grid.Column="0" Command="{Binding proxy.manual.ConnectCommand}">Connect</Button>
+                <Button Grid.Column="1" Command="{Binding proxy.manual.DisconnectCommand}">Disconnect</Button>
             </Grid>
 
             <ScrollViewer
@@ -43,7 +44,7 @@
                 <TextBlock
                     x:Name="txtOutput"
                     FontSize="12"
-                    Text="{Binding proxy.Status, Delay=100}"
+                    Text="{Binding proxy.Status}"
                     TextWrapping="Wrap" />
             </ScrollViewer>
         </StackPanel>

@@ -12,15 +12,6 @@ namespace AutoProxy.ViewModels
 {
     public class AutoProxyViewModel : BindableBase
     {
-		private bool? _isConnected = false;
-		public bool? IsConnected
-		{
-			get { return _isConnected; }
-			set { 
-				SetProperty(ref _isConnected, value);
-			}
-		}
-
         private string _status;
 		public string Status
 		{
@@ -34,7 +25,6 @@ namespace AutoProxy.ViewModels
             get { return _port; }
             set { 
                 SetProperty(ref _port, value);
-                ResetProxyMonitor();
             }
         }
 
@@ -44,151 +34,20 @@ namespace AutoProxy.ViewModels
             get { return _gateway; }
             set { 
                 SetProperty(ref _gateway, value);
-                ResetProxyMonitor();
             }
         }
 
-        private bool _autoSwitching = false;
-        public bool AutoSwitching
-        {
-            get { return _autoSwitching; }
-            set
-            {
-                SetProperty(ref _autoSwitching, value);
-                ResetProxyMonitor();
-            }
-        }
-
-        private int _delay = 3;
-        public int Delay
-        {
-            get { return _delay; }
-            set { SetProperty(ref _delay, value);
-                ResetProxyMonitor();
-            }
-        }
-
-        Task proxyFinderTask;
-		NetworkAdaptersHelper networkAdaptersHelper;
-
-        public ICommand ConnectCommand { get; set; }
-        public ICommand DisconnectCommand { get; set; }
-
+        public AutoSearchViewModel auto { get; set; }
+        public ManualSearchViewModel manual { get; set; }
 
         public AutoProxyViewModel()
         {
-            networkAdaptersHelper = new NetworkAdaptersHelper();
-            networkAdaptersHelper.StatusChanged += NetworkAdaptersHelper_StatusChanged;
-            networkAdaptersHelper.OnConnected += NetworkAdaptersHelper_OnConnected;
-            networkAdaptersHelper.OnFailed += NetworkAdaptersHelper_OnFailed;
-
-            ConnectCommand = new Command(Connect);
-            DisconnectCommand = new Command(Disconnect);
-        }
-
-        
-        private void Disconnect()
-        {
-            networkAdaptersHelper.ClearSystemProxy();
-            Status = $"Disconnected";
-            IsConnected = false;
+            auto   = new AutoSearchViewModel(this);
+            manual = new ManualSearchViewModel(this);
 
         }
-        private async void Connect()
-        {
-            if (!(proxyFinderTask is null) && proxyFinderTask.Status == TaskStatus.Running)
-            {
-                return;
-            }
-
-            proxyFinderTask = networkAdaptersHelper.TestGatewaysPortAndSetProxyAsync(Port, App.Current.Dispatcher);
-            await proxyFinderTask;
-        }
-
-        private void NetworkAdaptersHelper_OnConnected(string obj)
-        {
-            App.Current.Dispatcher.Invoke(() => {
-                Status = $"Connected to {obj}";
-                Gateway = obj;
-                IsConnected = true;
-
-            });
-
-            ResetProxyMonitor();
-        }
-        private void NetworkAdaptersHelper_OnFailed()
-        {
-            App.Current.Dispatcher.Invoke(() => {
-                Status = $"Failed to Connect";
-                IsConnected = false;
-            });
-        }
-        private void NetworkAdaptersHelper_StatusChanged(string obj)
-        {
-            App.Current.Dispatcher.Invoke(() => Status = obj);
-        }
 
 
 
-        ProxyMonitor proxyMonitor;
-
-        private async Task ResetProxyMonitorAsync()
-        {
-            if (!(proxyMonitor is null))
-            {
-                proxyMonitor.StopMonitoring();
-            }
-
-            proxyMonitor = new ProxyMonitor(Gateway, Port, Delay,networkAdaptersHelper);
-            proxyMonitor.ProxyDisabled += ProxyMonitor_ProxyDisabled; ;
-            proxyMonitor.ProxyOK += ProxyMonitor_ProxyOK; ;
-            await proxyMonitor.StartMonitoringAsync();
-        }
-        public void ResetProxyMonitor()
-        {
-            
-
-            if (!AutoSwitching)
-            {
-                proxyMonitor?.StopMonitoring();
-                proxyMonitor = null;
-                return;
-            }
-
-            Task.Run(ResetProxyMonitorAsync);
-        }
-
-
-        private void ProxyMonitor_ProxyOK()
-        {
-            if (IsConnected == true)
-                return;
-
-            if (proxyMonitor is null)
-                return;
-            
-
-            proxyMonitor.SetSystemProxy(Gateway, Port);
-
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                IsConnected = true;
-                Status = $"Proxy Reconnected to {Gateway}:{Port}";
-            });
-        }
-
-        private void ProxyMonitor_ProxyDisabled()
-        {
-            if (proxyMonitor is null)
-                return;
-
-            proxyMonitor.ClearSystemProxy();
-
-            App.Current.Dispatcher.Invoke(() =>
-            {
-                IsConnected = false;
-                Status = $"Proxy disabled due to closed port.";
-            });
-        }
     }
 }

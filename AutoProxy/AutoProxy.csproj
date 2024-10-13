@@ -57,10 +57,11 @@
     </ApplicationDefinition>
     <Compile Include="Helpers\ConsoleOutputRedirector.cs" />
     <Compile Include="Helpers\NetworkAdaptersHelper.cs" />
-    <Compile Include="Helpers\ProxyMonitor.cs" />
     <Compile Include="Helpers\SystemProxyHelper.cs" />
     <Compile Include="ViewModels\AutoProxyViewModel.cs" />
+    <Compile Include="ViewModels\AutoSearchViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ManualSearchViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

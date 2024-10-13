@@ -5,22 +5,10 @@ using System.Threading.Tasks;
 
 namespace AutoProxy.Helpers
 {
-    public class SystemProxyHelper
+    public static class SystemProxyHelper
     {
 
-        private string _status;
-        public string Status
-        {
-            get => _status;
-             set
-            {
-                _status = value;
-                OnStatusChanged(value); // Invoke the event when status changes
-            }
-        }
-        public event Action<string> StatusChanged;
-
-        public void ClearSystemProxy()
+        public static void ClearSystemProxy()
         {
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true))
             {
@@ -31,8 +19,7 @@ namespace AutoProxy.Helpers
                 }
             }
         }
-
-        public void SetSystemProxy(string ipAddress, int port)
+        public static void SetSystemProxy(string ipAddress, int port)
         {
             // Set the proxy settings in the registry
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", true))
@@ -46,15 +33,14 @@ namespace AutoProxy.Helpers
                 }
             }
         }
-
-        public async Task<bool> IsPortOpen(string ipAddress, int port)
+        public static bool IsPortOpen(string ipAddress, int port)
         {
             try
             {
                 using (TcpClient client = new TcpClient())
                 {
                     // Set a timeout for the connection attempt
-                    await client.ConnectAsync(ipAddress, port);
+                    client.Connect(ipAddress, port);
                     return client.Connected; // If connection is successful, return true
                 }
             }
@@ -68,11 +54,6 @@ namespace AutoProxy.Helpers
             }
         }
 
-        protected virtual void OnStatusChanged(string newStatus)
-        {
-            // Invoke the event on the UI thread if a dispatcher is provided
-            StatusChanged?.Invoke(newStatus);
-        }
 
 
     }
