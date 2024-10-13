@@ -35,7 +35,7 @@ namespace AutoProxy.ViewModels
 
         private bool CanUseManual()
         {
-            return !autoProxyViewModel.auto.AutoSwitching;
+            return !autoProxyViewModel.auto.AutoMode;
         }
 
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();

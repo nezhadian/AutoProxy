@@ -12,13 +12,13 @@ namespace AutoProxy.ViewModels
 {
     public class AutoSearchViewModel : BindableBase
     {
-        private bool _autoSwitching = false;
-        public bool AutoSwitching
+        private bool _autoMode = false;
+        public bool AutoMode
         {
-            get { return _autoSwitching; }
+            get { return _autoMode; }
             set
             {
-                SetProperty(ref _autoSwitching, value);
+                SetProperty(ref _autoMode, value);
                 OnAutoSwitchingChanged();
             }
         }
@@ -59,9 +59,11 @@ namespace AutoProxy.ViewModels
 
         private void OnAutoSwitchingChanged()
         {
-            if (!AutoSwitching) 
+            if (!AutoMode) 
             {
                 cancellationTokenSource?.Cancel();
+                SetStatus("Auto Mode Stopped.");
+                SystemProxyHelper.ClearSystemProxy();
                 return;
             }
 

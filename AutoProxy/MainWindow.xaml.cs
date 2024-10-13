@@ -30,7 +30,7 @@ namespace AutoProxy
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            App.MainViewModel.proxy.auto.AutoSwitching = true;
+            App.MainViewModel.proxy.auto.AutoMode = true;
         }
     }
 }
