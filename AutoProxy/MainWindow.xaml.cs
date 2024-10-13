@@ -32,5 +32,17 @@ namespace AutoProxy
         {
             App.MainViewModel.proxy.auto.AutoMode = true;
         }
+
+        private void AboutMe_Click(object sender, RoutedEventArgs e)
+        {
+            var resault = MessageBox.Show(
+                "Yasin Ebrahim Nezhadian. " +
+                "\r\nhttps://github.com/nezhadian/AutoProxy" +
+                "\r\nClick OK to Copy to Clipboard.");
+            if(resault == MessageBoxResult.OK)
+            {
+                Clipboard.SetText("https://github.com/nezhadian/AutoProxy");
+            }
+        }
     }
 }
