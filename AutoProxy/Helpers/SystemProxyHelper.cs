@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AutoProxy.Helpers
@@ -55,6 +57,25 @@ namespace AutoProxy.Helpers
         }
 
 
-
+        public static async Task<bool> IsPortOpenAsync(IPAddress ip, int port)
+        {
+            try
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    client.SendTimeout = 200;
+                    await client.ConnectAsync(ip, port);
+                    return client.Connected; // If connection is successful, return true
+                }
+            }
+            catch (SocketException)
+            {
+                return false; // If there is a socket exception, the port is closed
+            }
+            catch (Exception ex)
+            {
+                return false; // Handle other exceptions
+            }
+        }
     }
 }

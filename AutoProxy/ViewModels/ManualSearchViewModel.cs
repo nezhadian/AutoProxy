@@ -18,10 +18,10 @@ namespace AutoProxy.ViewModels
         public Command DisconnectCommand { get; set; }
 
 
-        public readonly AutoProxyViewModel autoProxyViewModel;
+        private readonly AutoProxyViewModel AutoProxyViewModel;
         public ManualSearchViewModel(AutoProxyViewModel autoProxyViewModel)
         {
-            this.autoProxyViewModel = autoProxyViewModel;
+            AutoProxyViewModel = autoProxyViewModel;
             autoProxyViewModel.auto.PropertyChanged += OnAutoModeChanged;
             ConnectCommand = new Command(Connect,CanUseManual);
             DisconnectCommand = new Command(Disconnect, CanUseManual);
@@ -35,44 +35,43 @@ namespace AutoProxy.ViewModels
 
         private bool CanUseManual()
         {
-            return !autoProxyViewModel.auto.AutoMode;
+            return !AutoProxyViewModel.auto.AutoMode;
         }
 
-        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private void Disconnect()
         {
-            cancellationTokenSource?.Cancel();
+            _cancellationTokenSource?.Cancel();
             SetStatus("Disconnected.");
             SystemProxyHelper.ClearSystemProxy();
 
         }
-        private async void Connect()
+        private void Connect()
         {
             
-            cancellationTokenSource?.Cancel();
-            cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = new CancellationTokenSource();
             SetStatus("Searching...");
-            await Task.Run(DoSearch);
+            Task.Run(DoSearch);
         }
-        private void DoSearch()
+        private async Task DoSearch()
         {
-            var gateway = NetworkAdaptersHelper.GetFirstOpenGateway(autoProxyViewModel.Port,cancellationTokenSource.Token);
+            var gateway = await NetworkAdaptersHelper.GetFirstOpenGatewayAsync(AutoProxyViewModel.Port,_cancellationTokenSource.Token);
             if (gateway is null) 
             {
-                SetStatus("Not finded.");
+                SetStatus("Not Found.");
                 return;
             }
 
-            autoProxyViewModel.Gateway = gateway.ToString();
-            SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
+            AutoProxyViewModel.Gateway = gateway.ToString();
             SetStatus($"Connected.");
 
         }
 
         private void SetStatus(string v)
         {
-            App.Current.Dispatcher.Invoke(() => autoProxyViewModel.Status = v);
+            App.Current.Dispatcher.Invoke(() => AutoProxyViewModel.Status = v);
             Console.WriteLine($"[Manual] {v}");
 
         }

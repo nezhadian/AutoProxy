@@ -32,9 +32,16 @@ namespace AutoProxy.ViewModels
         public string Gateway
         {
             get { return _gateway; }
-            set { 
+            set
+            {
                 SetProperty(ref _gateway, value);
+                OnGatewayChanged();
             }
+        }
+
+        private void OnGatewayChanged()
+        {
+            SystemProxyHelper.SetSystemProxy(Gateway, Port);
         }
 
         public AutoSearchViewModel auto { get; set; }

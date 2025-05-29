@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -15,40 +17,98 @@ namespace AutoProxy.Helpers
         public static IPAddress GetFirstOpenGateway(int port,CancellationToken token)
         {
             // Get all network interfaces
-            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+            var ips = GetListOfAvailableIpAddress();
 
-            foreach (NetworkInterface networkInterface in networkInterfaces)
+            foreach (var ip in ips)
             {
-                if (token.IsCancellationRequested)
+                if(token.IsCancellationRequested)
                     return null;
+                
+                var ipString = ip.ToString();
+                
+                Console.WriteLine($"Testing ip: {ipString} : {port}");
 
-                // Display the network adapter name and description
-                Console.WriteLine($"Testing adapter: {networkInterface.Name}");
+                bool isPortOpen = SystemProxyHelper.IsPortOpen(ipString, port);
 
-                // Get the IP properties for the network interface
-                IPInterfaceProperties ipProperties = networkInterface.GetIPProperties();
-
-                // Display the gateways and test the specified port
-                foreach (GatewayIPAddressInformation gateway in ipProperties.GatewayAddresses)
+                if (isPortOpen)
                 {
-                    if (token.IsCancellationRequested)
-                        return null;
-
-                    Console.WriteLine($"Testing gateway: {gateway.Address}");
-
-                    bool isPortOpen = SystemProxyHelper.IsPortOpen(gateway.Address.ToString(), port);
-                    Console.WriteLine($"Port {port} is {(isPortOpen ? "open" : "closed")} on gateway {gateway.Address}");
-
-                    // If the port is open, set the system proxy
-                    if (isPortOpen)
-                    {
-                        return gateway.Address;
-                    }
+                    return ip;
                 }
 
-                Console.WriteLine(); // Add a blank line for better readability
+                Console.WriteLine($"Port Closed : {ipString}:{port}");
             }
 
+            return null;
+        }
+        
+        public static async Task<IPAddress> GetFirstOpenGatewayAsync(int port, CancellationToken token)
+        {
+            // Get all network interfaces
+            var gatewayIps = GetListOfAvailableIpAddress();
+
+            if (gatewayIps.Count == 0)
+                return null;
+
+            // Create a linked cancellation token source
+            using (var cts = CancellationTokenSource.CreateLinkedTokenSource(token))
+            {
+                var testTasks = new List<Task<IPAddress>>();
+
+                foreach (var ip in gatewayIps)
+                {
+                    testTasks.Add(CheckIpLoop(ip, port, cts.Token));
+                }
+
+                try
+                {
+                    // Wait for any task to complete
+                    var completedTask = await Task.WhenAny(testTasks);
+                    var result = await completedTask;
+
+                    if (result != null)
+                    {
+                        // Found an open port - cancel all other checks
+                        cts.Cancel();
+                        return result;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Operation was cancelled - return null
+                }
+            }
+            
+            return null;
+        }
+
+        private static List<IPAddress> GetListOfAvailableIpAddress()
+        {
+            var networkInterfaces = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(i => i.OperationalStatus == OperationalStatus.Up);
+
+            var gatewayIps = networkInterfaces
+                .SelectMany(i => i.GetIPProperties().GatewayAddresses
+                    .Select(j => j.Address.MapToIPv4()))
+                .Distinct()
+                .ToList();
+            return gatewayIps;
+        }
+
+        private static async Task<IPAddress> CheckIpLoop(IPAddress ip, int port, CancellationToken ctsToken)
+        {
+            while (!ctsToken.IsCancellationRequested)
+            {
+                var isOpen = await SystemProxyHelper.IsPortOpenAsync(ip, port);
+
+                if (isOpen)
+                {
+                    return ip;
+                }
+                
+                Thread.Sleep(500);
+            }
+            
             return null;
         }
     }
