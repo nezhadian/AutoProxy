@@ -41,12 +41,11 @@ namespace AutoProxy.ViewModels
             this.autoProxyViewModel = autoProxyViewModel;
             autoProxyViewModel.PropertyChanged += OnPropertiesChanged;
         }
-
+        
         private void OnPropertiesChanged(object sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
-                case nameof(autoProxyViewModel.Gateway):
                 case nameof(autoProxyViewModel.Port):
                     OnAutoSwitchingChanged();
                     break;
@@ -68,13 +67,15 @@ namespace AutoProxy.ViewModels
 
             cancellationTokenSource?.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
-            SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
-            Task.Run(DoSearching);
+            Task.Run(CheckConnection,cancellationTokenSource.Token);
         }
 
-        private async Task DoSearching()
+        //periodically check the connected if connection lost tries to reconnect
+        private async Task CheckConnection()
         {
             var token = cancellationTokenSource.Token;
+            
+            
             while (!token.IsCancellationRequested)
             {
                 SetStatus($"Checking...");
@@ -89,7 +90,7 @@ namespace AutoProxy.ViewModels
                 else
                 {
                     SetStatus("Disconnected. Searching...");
-                    var gateway = NetworkAdaptersHelper.GetFirstOpenGateway(autoProxyViewModel.Port, token);
+                    var gateway = await NetworkAdaptersHelper.GetFirstOpenGatewayAsync(autoProxyViewModel.Port, token);
                     if(gateway is null)
                     {
                         SetStatus("Failed.");
@@ -101,7 +102,6 @@ namespace AutoProxy.ViewModels
                     {
                         autoProxyViewModel.Gateway = gateway.ToString();
                         SetStatus($"Reconnected.");
-                        SystemProxyHelper.SetSystemProxy(autoProxyViewModel.Gateway, autoProxyViewModel.Port);
                         await Task.Delay(TimeSpan.FromSeconds(Delay), token);
 
                     }

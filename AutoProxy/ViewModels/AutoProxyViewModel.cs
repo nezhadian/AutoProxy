@@ -32,9 +32,16 @@ namespace AutoProxy.ViewModels
         public string Gateway
         {
             get { return _gateway; }
-            set { 
+            set
+            {
                 SetProperty(ref _gateway, value);
+                OnGatewayChanged();
             }
+        }
+
+        private void OnGatewayChanged()
+        {
+            SystemProxyHelper.SetSystemProxy(Gateway, Port);
         }
 
         public AutoSearchViewModel auto { get; set; }
@@ -45,9 +52,20 @@ namespace AutoProxy.ViewModels
             auto   = new AutoSearchViewModel(this);
             manual = new ManualSearchViewModel(this);
 
+            Gateway = TryGetLastGateway();
         }
 
+        private string TryGetLastGateway()
+        {
+            var systemProxyString = SystemProxyHelper.GetSystemProxy();
+            
+            var doubleCoutIndex = systemProxyString.IndexOf(':');
 
+            if (doubleCoutIndex == -1)
+                return string.Empty;
+            
+            return systemProxyString.Substring(0, doubleCoutIndex);
 
+        }
     }
 }
