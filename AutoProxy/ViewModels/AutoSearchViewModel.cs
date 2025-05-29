@@ -67,13 +67,15 @@ namespace AutoProxy.ViewModels
 
             cancellationTokenSource?.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
-            Task.Run(CheckConnection);
+            Task.Run(CheckConnection,cancellationTokenSource.Token);
         }
 
         //periodically check the connected if connection lost tries to reconnect
         private async Task CheckConnection()
         {
             var token = cancellationTokenSource.Token;
+            
+            
             while (!token.IsCancellationRequested)
             {
                 SetStatus($"Checking...");

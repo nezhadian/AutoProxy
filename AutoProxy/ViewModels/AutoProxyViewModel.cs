@@ -52,9 +52,20 @@ namespace AutoProxy.ViewModels
             auto   = new AutoSearchViewModel(this);
             manual = new ManualSearchViewModel(this);
 
+            Gateway = TryGetLastGateway();
         }
 
+        private string TryGetLastGateway()
+        {
+            var systemProxyString = SystemProxyHelper.GetSystemProxy();
+            
+            var doubleCoutIndex = systemProxyString.IndexOf(':');
 
+            if (doubleCoutIndex == -1)
+                return string.Empty;
+            
+            return systemProxyString.Substring(0, doubleCoutIndex);
 
+        }
     }
 }

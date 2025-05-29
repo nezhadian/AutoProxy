@@ -77,5 +77,18 @@ namespace AutoProxy.Helpers
                 return false; // Handle other exceptions
             }
         }
+
+        public static string GetSystemProxy()
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", false))
+            {
+                if (key != null)
+                {
+                    return key.GetValue("ProxyServer").ToString();
+                }
+            }
+
+            return string.Empty;
+        }
     }
 }

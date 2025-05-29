@@ -59,22 +59,14 @@ namespace AutoProxy.Helpers
                     testTasks.Add(CheckIpLoop(ip, port, cts.Token));
                 }
 
-                try
-                {
-                    // Wait for any task to complete
-                    var completedTask = await Task.WhenAny(testTasks);
-                    var result = await completedTask;
+                var completedTask = await Task.WhenAny(testTasks);
+                var result = await completedTask;
 
-                    if (result != null)
-                    {
-                        // Found an open port - cancel all other checks
-                        cts.Cancel();
-                        return result;
-                    }
-                }
-                catch (OperationCanceledException)
+                if (result != null)
                 {
-                    // Operation was cancelled - return null
+                    // Found an open port - cancel all other checks
+                    cts.Cancel();
+                    return result;
                 }
             }
             

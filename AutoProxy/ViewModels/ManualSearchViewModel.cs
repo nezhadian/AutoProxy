@@ -53,10 +53,13 @@ namespace AutoProxy.ViewModels
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = new CancellationTokenSource();
             SetStatus("Searching...");
-            Task.Run(DoSearch);
+            Task.Run(DoSearch,_cancellationTokenSource.Token);
         }
         private async Task DoSearch()
         {
+            
+            var token = _cancellationTokenSource.Token;
+            
             var gateway = await NetworkAdaptersHelper.GetFirstOpenGatewayAsync(AutoProxyViewModel.Port,_cancellationTokenSource.Token);
             if (gateway is null) 
             {
