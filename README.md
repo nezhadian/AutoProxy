@@ -1,8 +1,9 @@
+<div dir="rtl">
+  
+
 # Auto Proxy
 # اتو پراکسی
 این برنامه به شما کمک میکند. که از طریق ویندوز به vpn گوشیتون وصل بشید.
-
-
 
 <h3>
 <a href="https://github.com/nezhadian/AutoProxy/releases/download/2/AutoProxy.exe">دانلود مستقیم<a/>
@@ -24,5 +25,6 @@ https://github.com/user-attachments/assets/633de8ba-749a-4ae5-85c7-389a7fcff7d6
 
 <b> فقط کافیه برنامه رو اجرا کنید مشکل حل میشه. <br/>
 
+</div>
 
 
